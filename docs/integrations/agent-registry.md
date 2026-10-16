@@ -235,14 +235,17 @@ dynamically fetch remote agents or toolsets using the Agent Registry client.
 
 ### Remote A2A Agents
 
-Calls to a remote A2A agent are not authenticated for you. If you are connecting
-to a Google A2A agent, supply an authenticated HTTP client when you create the
-remote agent.
-
 === "Python"
 
-    Pass an `httpx.AsyncClient` configured with Google authentication headers to
-    the `get_remote_a2a_agent` method.
+    In ADK Python v2.8.0 and later, `get_remote_a2a_agent` resolves an auth
+    scheme from the agent's IAM bindings when `auth_scheme` is omitted. A custom
+    HTTP client is not required when those bindings provide the needed
+    authentication. If no binding is found or the lookup fails, no auth scheme
+    is added, so configure authentication explicitly for agents that require it.
+
+    To override the resolved scheme, pass `auth_scheme` and, if needed,
+    `auth_credential`. You can also supply an `httpx.AsyncClient` configured
+    with Google authentication headers:
 
     ```python
     import httpx
@@ -392,8 +395,7 @@ For Google MCP servers, authentication headers are automatically passed in.
       not affect calls to the Agent Registry API itself, and they do not affect
       requests made by
       [RemoteA2aAgent](/a2a/quickstart-consuming/#quickstart-consuming-a-remote-agent-via-a2a).
-      For those requests, pass an authenticated `httpx.AsyncClient` to
-      `get_remote_a2a_agent`, as shown in
+      For authentication options for those requests, see
       [Remote A2A Agents](#remote-a2a-agents).
 
 === "Go"
