@@ -471,6 +471,12 @@ retrieve memories. ADK includes two pre-built tools for retrieving memories:
     )
     ```
 
+    To customize the introduction, use a
+    `PreloadMemoryTool(instruction="Use remembered preferences when relevant.")`
+    instance in `tools`, imported from `google.adk.tools.preload_memory_tool`.
+    The default introduction is unchanged. Set `instruction=""` to omit it
+    while keeping the recalled memory block.
+
 === "TypeScript"
 
     ```typescript
