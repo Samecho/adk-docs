@@ -1,0 +1,37 @@
+name: Preload memory documentation validation
+on:
+  push:
+    branches: [codex/7423-docs-validation]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          ref: fb34de2706f5256f873ccc9b80768f70c6f89883
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.14'
+      - run: pip install -r requirements.txt
+      - run: mkdocs build --strict
+      - name: Check the rendered Python tab
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from bs4 import BeautifulSoup
+          document = BeautifulSoup(Path('site/sessions/memory/index.html').read_text(), 'html.parser')
+          paragraph = next(p for p in document.find_all('p') if 'To customize the introduction' in p.get_text())
+          text = paragraph.get_text(' ', strip=True)
+          assert 'PreloadMemoryTool(instruction="Use remembered preferences when relevant.")' in text
+          assert 'google.adk.tools.preload_memory_tool' in text
+          assert 'instruction=""' in text
+          tab = paragraph.find_parent(class_='tabbed-block')
+          assert tab is not None
+          assert 'from google.adk.agents import Agent' in tab.get_text()
+          assert 'TypeScript' not in tab.get_text()
+          print('The existing Python tab contains the custom/default/empty instruction guidance.')
+          PY
